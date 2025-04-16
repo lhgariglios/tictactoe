@@ -51,20 +51,28 @@ public:
             turn_cv.wait(lock);
         }
 
-        if(board[row][col] != 'X' && board[row][col] != 'O'){
-            board[row][col] = player;
-            display_board();
-            if(player == 'O'){
-                current_player = 'X';
+        if(!is_game_over()){
+            if(board[row][col] != 'X' && board[row][col] != 'O'){
+                board[row][col] = player;
+                display_board();
+                if(player == 'O'){
+                    current_player = 'X';
+                }else{
+                    current_player = 'O';
+                }
+                turn_cv.notify_one();
+                board_mutex.unlock();
+                return 1;
             }else{
-                current_player = 'O';
+                return 0;
             }
+        }else{
             turn_cv.notify_one();
             board_mutex.unlock();
             return 1;
-        }else{
-            return 0;
         }
+
+        
     }
 
  /*    bool check_win(char player) {
@@ -94,12 +102,33 @@ public:
         }
     }
 
-    char get_winner() {
+    /* char get_winner() {
         // Retornar o vencedor do jogo ('X', 'O', ou 'D' para empate)
         // linhas
-
+        for(int i = 0; i < 3; i++){
+            if(board[i][0] == board[i][1] && board[i][1] == board[i][2]){
+                return board[i][0];
+            }
+        }
+        // colunas
+        for(int i = 0; i < 3; i++){
+            if(board[0][i] == board[1][i] && board[i][1] == board[2][i]){
+                return board[i][0];
+            }
+        }
+        // diagonal
+        if(board[0][0] == board[1][1] && board[1][1] == board[2][2]){
+                return board[1][1];
+        }
+        if(board[0][2] == board[1][1] && board[1][1] == board[2][0]){
+                return board[1][1];
+        }
+        if (check_draw()){
+            return 'D';
+        }
+        return 0;
         
-    } 
+    }   */
 };
 
 // Classe Player
