@@ -23,7 +23,7 @@ public:
                 board[i][j] = ' ';
             }
         }
-        winner = ' ';
+        winner = 'N';
         game_over = 0;
         current_player = 'O';
 
@@ -51,10 +51,13 @@ public:
             turn_cv.wait(lock);
         }
 
-        if(!is_game_over()){
+        
+
+        if(!game_over){
             if(board[row][col] != 'X' && board[row][col] != 'O'){
                 board[row][col] = player;
                 display_board();
+                game_over = is_game_over();
                 if(player == 'O'){
                     current_player = 'X';
                 }else{
@@ -75,11 +78,34 @@ public:
         
     }
 
- /*    bool check_win(char player) {
+    bool check_win(char player) {
         // Verificar se o jogador atual venceu o jogo
+        // linhas
+        for(int i = 0; i < 3; i++){
+            if(player == board[i][0] && player == board[i][1] && player == board[i][2]){
+                winner = player;
+                return 1;
+            }
+        }
+        // colunas
+        for(int i = 0; i < 3; i++){
+            if(player == board[0][i] && player == board[1][i] && player == board[2][i]){
+                winner = player;
+                return 1;
+            }
+        }
+        // diagonal
+        if(player == board[0][0] && player == board[1][1] && player == board[2][2]){
+            winner = player;
+            return 1;
+        }
+        if(player == board[0][2] && player == board[1][1] && player == board[2][0]){
+            winner = player;
+            return 1;
+        }
+        return 0;
         
-        
-    } */
+    }
 
     bool check_draw() {
         // Verificar se houve um empate
@@ -95,40 +121,24 @@ public:
 
     bool is_game_over() {
         // Retornar se o jogo terminou
-        if(check_draw()){
+
+        if(check_win(current_player)){
+            return 1;
+        }else if(check_draw()){
+            winner = 'D';
             return 1;
         }else{
+            winner = 'N';
             return 0;
         }
     }
 
-    /* char get_winner() {
-        // Retornar o vencedor do jogo ('X', 'O', ou 'D' para empate)
-        // linhas
-        for(int i = 0; i < 3; i++){
-            if(board[i][0] == board[i][1] && board[i][1] == board[i][2]){
-                return board[i][0];
-            }
-        }
-        // colunas
-        for(int i = 0; i < 3; i++){
-            if(board[0][i] == board[1][i] && board[i][1] == board[2][i]){
-                return board[i][0];
-            }
-        }
-        // diagonal
-        if(board[0][0] == board[1][1] && board[1][1] == board[2][2]){
-                return board[1][1];
-        }
-        if(board[0][2] == board[1][1] && board[1][1] == board[2][0]){
-                return board[1][1];
-        }
-        if (check_draw()){
-            return 'D';
-        }
-        return 0;
+    char get_winner() {
+        // Retornar o vencedor do jogo ('X', 'O', 'D' para empate ou 'N' para caso o jogo não tenha terminado)
+
+        return winner;
         
-    }   */
+    }  
 };
 
 // Classe Player
@@ -144,7 +154,7 @@ public:
 
     void play() {
         // Executar jogadas de acordo com a estratégia escolhida
-        while(!game.is_game_over()){
+        while(game.get_winner() == 'N'){
             if(strategy == "sequential"){
                 play_sequential();
             }else{
@@ -167,12 +177,17 @@ private:
 
     void play_random() {
         // Implementar a estratégia aleatória de jogadas
+        int l;
+        int c;
+        bool fim = 0;
         static std::random_device rd;
         static std::mt19937 gen(rd());
         static std::uniform_int_distribution<> distr(0, 2);
-        int l = distr(gen);
-        int c = distr(gen);
-        game.make_move(symbol, l, c);
+        while(!fim){
+            l = distr(gen);
+            c = distr(gen);
+            fim = game.make_move(symbol, l, c);
+        } 
     } 
 };  
 
@@ -184,7 +199,7 @@ int main() {
     TicTacToe tabuleiro;
     tabuleiro.display_board();
     Player X(tabuleiro, 'X', "random");
-    Player O(tabuleiro, 'O', "sequential");
+    Player O(tabuleiro, 'O', "random");
 
     // Criar as threads para os jogadores
 
@@ -199,6 +214,11 @@ int main() {
     // Exibir o resultado final do jogo
 
     std::cout<<"\n Fim de Jogo!\n";
-
+    char vencedor = tabuleiro.get_winner();
+    if(vencedor == 'D'){
+        std::cout<<" Empate!\n";
+    }else{
+        std::cout<<" Vencedor: "<<vencedor<<"\n";
+    }
     return 0;
 }
