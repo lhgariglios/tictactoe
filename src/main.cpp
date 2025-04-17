@@ -39,6 +39,7 @@ public:
                 printf("-----\n");
             }
         }
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
     bool make_move(char player, int row, int col) {
@@ -155,6 +156,7 @@ public:
     void play() {
         // Executar jogadas de acordo com a estratégia escolhida
         while(game.get_winner() == 'N'){
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
             if(strategy == "sequential"){
                 play_sequential();
             }else{
