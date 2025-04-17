@@ -200,7 +200,7 @@ int main() {
 
     TicTacToe tabuleiro;
     tabuleiro.display_board();
-    Player X(tabuleiro, 'X', "random");
+    Player X(tabuleiro, 'X', "sequential");
     Player O(tabuleiro, 'O', "random");
 
     // Criar as threads para os jogadores
